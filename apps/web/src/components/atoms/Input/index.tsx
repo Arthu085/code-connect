@@ -12,7 +12,7 @@ export function Input({ hasError, className = '', ...props }: InputProps) {
           ? 'border-[var(--color-error)] focus:ring-[var(--color-error)]'
           : 'border-[var(--color-input-border)]'
       } ${className}`}
-      aria-invalid={hasError ?? undefined}
+      aria-invalid={hasError || undefined}
       {...props}
     />
   )

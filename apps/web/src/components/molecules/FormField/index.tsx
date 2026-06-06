@@ -8,7 +8,7 @@ type FormFieldProps = InputHTMLAttributes<HTMLInputElement> & {
   error?: string
 }
 
-export function FormField({ label, fieldId, error, ...inputProps }: FormFieldProps) {
+export function FormField({ label, fieldId, id: _id, error, ...inputProps }: FormFieldProps) {
   return (
     <div className="flex flex-col gap-1">
       <Label htmlFor={fieldId}>{label}</Label>

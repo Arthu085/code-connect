@@ -47,7 +47,7 @@ export function LoginForm() {
     setSubmitted(true)
 
     if (Object.keys(newErrors).length === 0) {
-      console.log({ emailOuUsuario, senha, lembrar })
+      // TODO: chamar API de autenticação
     }
   }
 
