@@ -7,7 +7,7 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 export function Button({ icon, children, className = '', disabled, ...props }: ButtonProps) {
   return (
     <button
-      className={`w-full flex items-center justify-center gap-2 rounded-md bg-[var(--color-brand)] px-4 py-3 text-sm font-bold text-[#0a0d0e] transition hover:bg-[var(--color-brand-hover)] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${className}`}
+      className={`w-full flex items-center justify-center gap-2 rounded-md bg-brand px-4 py-3 text-sm font-bold text-on-brand transition hover:bg-brand-hover disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${className}`}
       disabled={disabled}
       {...props}
     >

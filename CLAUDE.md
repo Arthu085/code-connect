@@ -67,13 +67,47 @@ Standard NestJS module structure. Entry point: `src/main.ts` → `AppModule`. Th
 
 ### Web (`apps/web`)
 
-Plain TypeScript with Vite. No framework installed yet — `src/main.ts` is the entry point doing vanilla DOM manipulation. Assets live in `src/assets/`.
+React + Vite + TypeScript. Entry point: `src/main.tsx`. Routing via `react-router-dom` (`BrowserRouter` + `Routes`). Assets live in `public/`.
 
 #### Frontend conventions
 
 - **Atomic Design**: organize components under `src/components/` following the hierarchy `atoms/`, `molecules/`, `organisms/`, `templates/`, `pages/`. Place each component in its own directory with an `index.tsx` and a co-located `*.test.tsx`.
 - **Tailwind CSS**: use Tailwind utility classes for all styling. Avoid arbitrary CSS files for components.
-- **Tests**: every component must have a test covering its essential usage (render, key interactions, critical props). Use the project's test runner; no component is considered done without a passing test.
+- **Tests**: every component must have a test covering its essential usage (render, key interactions, critical props). Use the project's test runner; no component is considered done without a passing test. Components that use `Link` (router) must wrap their render in `<MemoryRouter>`.
+
+#### Colors
+
+The project palette is declared in `src/styles.css` inside the `@theme` block as `--color-*` variables. Tailwind v4 generates utilities automatically from these tokens — **never** use `[var(--color-*)]`, `[#hexvalue]`, or any other arbitrary color syntax.
+
+| Token | Utility examples |
+|---|---|
+| `--color-brand` | `bg-brand`, `text-brand`, `ring-brand`, `accent-brand` |
+| `--color-brand-hover` | `hover:bg-brand-hover` |
+| `--color-on-brand` | `text-on-brand` |
+| `--color-page-bg` | `bg-page-bg` |
+| `--color-card-bg` | `bg-card-bg` |
+| `--color-input-bg` | `bg-input-bg` |
+| `--color-input-border` | `border-input-border`, `bg-input-border` |
+| `--color-input-placeholder` | `placeholder-input-placeholder` |
+| `--color-text-primary` | `text-text-primary` |
+| `--color-text-muted` | `text-text-muted` |
+| `--color-error` | `text-error`, `border-error`, `ring-error` |
+
+To add a new color, declare it in `@theme` and use the generated utility — do not hardcode values inline.
+
+#### Font sizes
+
+Always use Tailwind's built-in size scale. Never use arbitrary values like `text-[18px]`.
+
+| Tailwind class | Size |
+|---|---|
+| `text-xs` | 12px — labels, captions |
+| `text-sm` | 14px — body small, form hints |
+| `text-base` | 16px — default body |
+| `text-lg` | 18px — body large |
+| `text-xl` | 20px — subheadings |
+| `text-2xl` | 24px — section titles |
+| `text-3xl` | 30px — page headings |
 
 ### Workspace
 
@@ -90,6 +124,7 @@ All commits in both apps must follow **Conventional Commits**:
 Common types: `feat`, `fix`, `chore`, `refactor`, `test`, `docs`, `style`, `perf`, `ci`.
 
 Examples:
+
 - `feat(web): add Button atom with Tailwind styles`
 - `fix(api): return 404 when post is not found`
 - `test(web): cover Card molecule render`

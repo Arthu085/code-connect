@@ -8,17 +8,22 @@ import { SocialButton } from '../../molecules/SocialButton'
 import { validateEmail } from '../../../lib/validators'
 
 type FormErrors = {
-  emailOuUsuario?: string
+  nome?: string
+  email?: string
   senha?: string
 }
 
-function validate(emailOuUsuario: string, senha: string): FormErrors {
+function validate(nome: string, email: string, senha: string): FormErrors {
   const errors: FormErrors = {}
 
-  if (!emailOuUsuario.trim()) {
-    errors.emailOuUsuario = 'Campo obrigatório'
-  } else if (emailOuUsuario.includes('@') && !validateEmail(emailOuUsuario)) {
-    errors.emailOuUsuario = 'Formato de e-mail inválido'
+  if (!nome.trim()) {
+    errors.nome = 'Campo obrigatório'
+  }
+
+  if (!email.trim()) {
+    errors.email = 'Campo obrigatório'
+  } else if (!validateEmail(email)) {
+    errors.email = 'Formato de e-mail inválido'
   }
 
   if (!senha) {
@@ -30,37 +35,51 @@ function validate(emailOuUsuario: string, senha: string): FormErrors {
   return errors
 }
 
-export function LoginForm() {
-  const [emailOuUsuario, setEmailOuUsuario] = useState('')
+export function SignupForm() {
+  const [nome, setNome] = useState('')
+  const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
-  const [lembrar, setLembrar] = useState(false)
+  const [lembrar, setLembrar] = useState(true)
   const [errors, setErrors] = useState<FormErrors>({})
   const [submitted, setSubmitted] = useState(false)
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    const newErrors = validate(emailOuUsuario, senha)
+    const newErrors = validate(nome, email, senha)
     setErrors(newErrors)
     setSubmitted(true)
 
     if (Object.keys(newErrors).length === 0) {
-      // TODO: chamar API de autenticação
+      // TODO: chamar API de cadastro
     }
   }
 
   return (
     <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
       <FormField
-        label="Email ou usuário"
-        fieldId="emailOuUsuario"
+        label="Nome"
+        fieldId="nome"
         type="text"
-        placeholder="usuario123"
-        value={emailOuUsuario}
+        placeholder="Nome completo"
+        value={nome}
         onChange={(e) => {
-          setEmailOuUsuario(e.target.value)
-          if (submitted) setErrors((prev) => ({ ...prev, emailOuUsuario: validate(e.target.value, senha).emailOuUsuario }))
+          setNome(e.target.value)
+          if (submitted) setErrors((prev) => ({ ...prev, nome: validate(e.target.value, email, senha).nome }))
         }}
-        error={errors.emailOuUsuario}
+        error={errors.nome}
+      />
+
+      <FormField
+        label="Email"
+        fieldId="email"
+        type="email"
+        placeholder="Digite seu email"
+        value={email}
+        onChange={(e) => {
+          setEmail(e.target.value)
+          if (submitted) setErrors((prev) => ({ ...prev, email: validate(nome, e.target.value, senha).email }))
+        }}
+        error={errors.email}
       />
 
       <FormField
@@ -71,23 +90,20 @@ export function LoginForm() {
         value={senha}
         onChange={(e) => {
           setSenha(e.target.value)
-          if (submitted) setErrors((prev) => ({ ...prev, senha: validate(emailOuUsuario, e.target.value).senha }))
+          if (submitted) setErrors((prev) => ({ ...prev, senha: validate(nome, email, e.target.value).senha }))
         }}
         error={errors.senha}
       />
 
-      <div className="flex items-center justify-between">
-        <Checkbox
-          id="lembrar"
-          label="Lembrar-me"
-          checked={lembrar}
-          onChange={(e) => setLembrar(e.target.checked)}
-        />
-        <Link href="#">Esqueci a senha</Link>
-      </div>
+      <Checkbox
+        id="lembrar"
+        label="Lembrar-me"
+        checked={lembrar}
+        onChange={(e) => setLembrar(e.target.checked)}
+      />
 
       <Button type="submit" icon="→">
-        Login
+        Cadastrar
       </Button>
 
       <Divider text="ou entre com outras contas" />
@@ -98,9 +114,9 @@ export function LoginForm() {
       </div>
 
       <p className="text-center text-sm text-text-muted">
-        Ainda não tem conta?{' '}
-        <Link to="/cadastro" variant="brand">
-          Crie seu cadastro! 📋
+        Já tem conta?{' '}
+        <Link to="/login" variant="brand">
+          Faça seu login! →
         </Link>
       </p>
     </form>

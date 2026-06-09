@@ -1,24 +1,33 @@
 import { render, screen } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import { LoginPage } from '.'
+
+function renderPage() {
+  return render(
+    <MemoryRouter>
+      <LoginPage />
+    </MemoryRouter>,
+  )
+}
 
 describe('LoginPage', () => {
   it('renders the Login heading', () => {
-    render(<LoginPage />)
+    renderPage()
     expect(screen.getByRole('heading', { name: 'Login' })).toBeInTheDocument()
   })
 
   it('renders the subtitle', () => {
-    render(<LoginPage />)
+    renderPage()
     expect(screen.getByText('Boas-vindas! Faça seu login.')).toBeInTheDocument()
   })
 
   it('renders the banner image', () => {
-    render(<LoginPage />)
+    renderPage()
     expect(screen.getByAltText('Banner da página de login')).toBeInTheDocument()
   })
 
   it('renders the login form', () => {
-    render(<LoginPage />)
+    renderPage()
     expect(screen.getByLabelText('Email ou usuário')).toBeInTheDocument()
     expect(screen.getByLabelText('Senha')).toBeInTheDocument()
   })

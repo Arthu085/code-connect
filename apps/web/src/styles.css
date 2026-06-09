@@ -1,8 +1,12 @@
 @import "tailwindcss";
+@import "@fontsource-variable/inter";
 
 @theme {
-  --color-brand: #5bf67b;
-  --color-brand-hover: #4ae06a;
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+
+  --color-brand: #81fe88;
+  --color-brand-hover: #6ee676;
+  --color-on-brand: #132e35;
   --color-page-bg: #0a0d0e;
   --color-card-bg: #17191b;
   --color-input-bg: #2a2d2f;

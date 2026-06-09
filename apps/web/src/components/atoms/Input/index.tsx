@@ -7,10 +7,10 @@ type InputProps = InputHTMLAttributes<HTMLInputElement> & {
 export function Input({ hasError, className = '', ...props }: InputProps) {
   return (
     <input
-      className={`w-full rounded-md bg-[var(--color-input-bg)] border px-3 py-2 text-sm text-[var(--color-text-primary)] placeholder-[var(--color-input-placeholder)] outline-none focus:ring-2 focus:ring-[var(--color-brand)] transition ${
+      className={`w-full rounded-md bg-input-bg border px-3 py-2 text-sm text-text-primary placeholder-input-placeholder outline-none focus:ring-2 focus:ring-brand transition ${
         hasError
-          ? 'border-[var(--color-error)] focus:ring-[var(--color-error)]'
-          : 'border-[var(--color-input-border)]'
+          ? 'border-error focus:ring-error'
+          : 'border-input-border'
       } ${className}`}
       aria-invalid={hasError || undefined}
       {...props}
