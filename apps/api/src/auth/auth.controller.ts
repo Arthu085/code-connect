@@ -50,10 +50,10 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOkResponse({ type: ProfileResponseDto })
   @ApiUnauthorizedResponse({ description: 'Missing or invalid token' })
-  profile(
+  async profile(
     @Request() req: { user: { userId: string; email: string } },
-  ): ProfileResponseDto {
-    const user = this.usersService.findById(req.user.userId);
+  ): Promise<ProfileResponseDto> {
+    const user = await this.usersService.findById(req.user.userId);
     return { id: user!.id, name: user!.name, email: user!.email };
   }
 }

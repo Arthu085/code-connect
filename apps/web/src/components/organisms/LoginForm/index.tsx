@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { FormField } from '../../molecules/FormField'
 import { Checkbox } from '../../atoms/Checkbox'
 import { Link } from '../../atoms/Link'
@@ -6,19 +7,21 @@ import { Button } from '../../atoms/Button'
 import { Divider } from '../../molecules/Divider'
 import { SocialButton } from '../../molecules/SocialButton'
 import { validateEmail } from '../../../lib/validators'
+import { login, getApiErrorMessage } from '../../../lib/auth'
+import { saveToken } from '../../../lib/tokenStorage'
 
 type FormErrors = {
-  emailOuUsuario?: string
+  email?: string
   senha?: string
 }
 
-function validate(emailOuUsuario: string, senha: string): FormErrors {
+function validate(email: string, senha: string): FormErrors {
   const errors: FormErrors = {}
 
-  if (!emailOuUsuario.trim()) {
-    errors.emailOuUsuario = 'Campo obrigatório'
-  } else if (emailOuUsuario.includes('@') && !validateEmail(emailOuUsuario)) {
-    errors.emailOuUsuario = 'Formato de e-mail inválido'
+  if (!email.trim()) {
+    errors.email = 'Campo obrigatório'
+  } else if (!validateEmail(email)) {
+    errors.email = 'Formato de e-mail inválido'
   }
 
   if (!senha) {
@@ -31,36 +34,53 @@ function validate(emailOuUsuario: string, senha: string): FormErrors {
 }
 
 export function LoginForm() {
-  const [emailOuUsuario, setEmailOuUsuario] = useState('')
+  const navigate = useNavigate()
+  const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
   const [lembrar, setLembrar] = useState(false)
   const [errors, setErrors] = useState<FormErrors>({})
   const [submitted, setSubmitted] = useState(false)
+  const [apiError, setApiError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    const newErrors = validate(emailOuUsuario, senha)
+    const newErrors = validate(email, senha)
     setErrors(newErrors)
     setSubmitted(true)
 
     if (Object.keys(newErrors).length === 0) {
-      // TODO: chamar API de autenticação
+      setApiError(null)
+      setLoading(true)
+      try {
+        const { access_token } = await login({ email, password: senha })
+        saveToken(access_token, lembrar)
+        navigate('/perfil')
+      } catch (err) {
+        setApiError(
+          getApiErrorMessage(err, {
+            401: 'E-mail ou senha inválidos',
+          }),
+        )
+      } finally {
+        setLoading(false)
+      }
     }
   }
 
   return (
     <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
       <FormField
-        label="Email ou usuário"
-        fieldId="emailOuUsuario"
-        type="text"
-        placeholder="usuario123"
-        value={emailOuUsuario}
+        label="Email"
+        fieldId="email"
+        type="email"
+        placeholder="usuario@email.com"
+        value={email}
         onChange={(e) => {
-          setEmailOuUsuario(e.target.value)
-          if (submitted) setErrors((prev) => ({ ...prev, emailOuUsuario: validate(e.target.value, senha).emailOuUsuario }))
+          setEmail(e.target.value)
+          if (submitted) setErrors((prev) => ({ ...prev, email: validate(e.target.value, senha).email }))
         }}
-        error={errors.emailOuUsuario}
+        error={errors.email}
       />
 
       <FormField
@@ -71,7 +91,7 @@ export function LoginForm() {
         value={senha}
         onChange={(e) => {
           setSenha(e.target.value)
-          if (submitted) setErrors((prev) => ({ ...prev, senha: validate(emailOuUsuario, e.target.value).senha }))
+          if (submitted) setErrors((prev) => ({ ...prev, senha: validate(email, e.target.value).senha }))
         }}
         error={errors.senha}
       />
@@ -86,8 +106,14 @@ export function LoginForm() {
         <Link href="#">Esqueci a senha</Link>
       </div>
 
-      <Button type="submit" icon="→">
-        Login
+      {apiError && (
+        <p role="alert" className="text-sm text-error">
+          {apiError}
+        </p>
+      )}
+
+      <Button type="submit" icon="→" disabled={loading}>
+        {loading ? 'Entrando...' : 'Login'}
       </Button>
 
       <Divider text="ou entre com outras contas" />

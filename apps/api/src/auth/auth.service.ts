@@ -15,7 +15,7 @@ export class AuthService {
 
   async register(dto: RegisterDto): Promise<AuthResponseDto> {
     const passwordHash = await bcrypt.hash(dto.password, 10);
-    const user = this.usersService.create({
+    const user = await this.usersService.create({
       name: dto.name,
       email: dto.email,
       passwordHash,
@@ -24,7 +24,7 @@ export class AuthService {
   }
 
   async login(dto: LoginDto): Promise<AuthResponseDto> {
-    const user = this.usersService.findByEmail(dto.email);
+    const user = await this.usersService.findByEmail(dto.email);
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }

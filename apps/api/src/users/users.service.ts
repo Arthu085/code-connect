@@ -1,29 +1,36 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { randomUUID } from 'crypto';
+import { Prisma } from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
 import { PublicUser, User, toPublicUser } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
-  private readonly users: User[] = [];
+  constructor(private readonly prisma: PrismaService) {}
 
-  create(data: {
+  async create(data: {
     name: string;
     email: string;
     passwordHash: string;
-  }): PublicUser {
-    if (this.findByEmail(data.email)) {
-      throw new ConflictException('Email already in use');
+  }): Promise<PublicUser> {
+    try {
+      const user = await this.prisma.user.create({ data });
+      return toPublicUser(user);
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        throw new ConflictException('Email already in use');
+      }
+      throw error;
     }
-    const user: User = { id: randomUUID(), ...data };
-    this.users.push(user);
-    return toPublicUser(user);
   }
 
-  findByEmail(email: string): User | undefined {
-    return this.users.find((u) => u.email === email);
+  findByEmail(email: string): Promise<User | null> {
+    return this.prisma.user.findUnique({ where: { email } });
   }
 
-  findById(id: string): User | undefined {
-    return this.users.find((u) => u.id === id);
+  findById(id: string): Promise<User | null> {
+    return this.prisma.user.findUnique({ where: { id } });
   }
 }

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { FormField } from '../../molecules/FormField'
 import { Checkbox } from '../../atoms/Checkbox'
 import { Link } from '../../atoms/Link'
@@ -6,6 +7,8 @@ import { Button } from '../../atoms/Button'
 import { Divider } from '../../molecules/Divider'
 import { SocialButton } from '../../molecules/SocialButton'
 import { validateEmail } from '../../../lib/validators'
+import { register, getApiErrorMessage } from '../../../lib/auth'
+import { saveToken } from '../../../lib/tokenStorage'
 
 type FormErrors = {
   nome?: string
@@ -36,21 +39,38 @@ function validate(nome: string, email: string, senha: string): FormErrors {
 }
 
 export function SignupForm() {
+  const navigate = useNavigate()
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
   const [lembrar, setLembrar] = useState(true)
   const [errors, setErrors] = useState<FormErrors>({})
   const [submitted, setSubmitted] = useState(false)
+  const [apiError, setApiError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     const newErrors = validate(nome, email, senha)
     setErrors(newErrors)
     setSubmitted(true)
 
     if (Object.keys(newErrors).length === 0) {
-      // TODO: chamar API de cadastro
+      setApiError(null)
+      setLoading(true)
+      try {
+        const { access_token } = await register({ name: nome, email, password: senha })
+        saveToken(access_token, lembrar)
+        navigate('/perfil')
+      } catch (err) {
+        setApiError(
+          getApiErrorMessage(err, {
+            409: 'Este e-mail já está cadastrado',
+          }),
+        )
+      } finally {
+        setLoading(false)
+      }
     }
   }
 
@@ -102,8 +122,14 @@ export function SignupForm() {
         onChange={(e) => setLembrar(e.target.checked)}
       />
 
-      <Button type="submit" icon="→">
-        Cadastrar
+      {apiError && (
+        <p role="alert" className="text-sm text-error">
+          {apiError}
+        </p>
+      )}
+
+      <Button type="submit" icon="→" disabled={loading}>
+        {loading ? 'Cadastrando...' : 'Cadastrar'}
       </Button>
 
       <Divider text="ou entre com outras contas" />

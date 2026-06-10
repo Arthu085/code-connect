@@ -58,17 +58,19 @@ describe('AuthController', () => {
     expect(result).toEqual(mockToken);
   });
 
-  it('profile returns user data without passwordHash', () => {
+  it('profile returns user data without passwordHash', async () => {
     const mockUser = {
       id: 'user-1',
       name: 'Ada',
       email: 'ada@test.com',
       passwordHash: 'hash',
     };
-    const spy = jest.spyOn(usersService, 'findById').mockReturnValue(mockUser);
+    const spy = jest
+      .spyOn(usersService, 'findById')
+      .mockResolvedValue(mockUser);
 
     const req = { user: { userId: 'user-1', email: 'ada@test.com' } };
-    const result = controller.profile(req);
+    const result = await controller.profile(req);
 
     expect(spy).toHaveBeenCalledWith('user-1');
     expect(result).toEqual({

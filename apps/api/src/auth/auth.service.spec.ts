@@ -1,15 +1,47 @@
 import { ConflictException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { Prisma } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
+import { randomUUID } from 'crypto';
+import { PrismaService } from '../prisma/prisma.service';
+import { User } from '../users/entities/user.entity';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
+
+function createFakePrisma(): PrismaService {
+  const rows: User[] = [];
+  return {
+    user: {
+      create: jest.fn(({ data }: { data: Omit<User, 'id'> }) => {
+        if (rows.some((u) => u.email === data.email)) {
+          return Promise.reject(
+            new Prisma.PrismaClientKnownRequestError(
+              'Unique constraint failed',
+              { code: 'P2002', clientVersion: 'test' },
+            ),
+          );
+        }
+        const row: User = { id: randomUUID(), ...data };
+        rows.push(row);
+        return Promise.resolve(row);
+      }),
+      findUnique: jest.fn(({ where }: { where: Partial<User> }) =>
+        Promise.resolve(
+          rows.find((u) =>
+            where.email ? u.email === where.email : u.id === where.id,
+          ) ?? null,
+        ),
+      ),
+    },
+  } as unknown as PrismaService;
+}
 
 describe('AuthService', () => {
   let authService: AuthService;
   let usersService: UsersService;
 
   beforeEach(() => {
-    usersService = new UsersService();
+    usersService = new UsersService(createFakePrisma());
     authService = new AuthService(
       usersService,
       new JwtService({ secret: 'test-secret' }),
@@ -48,7 +80,7 @@ describe('AuthService', () => {
         email: 'ada@test.com',
         password: 'secret123',
       });
-      const user = usersService.findByEmail('ada@test.com');
+      const user = await usersService.findByEmail('ada@test.com');
       expect(user).toBeDefined();
       const matches = await bcrypt.compare('secret123', user!.passwordHash);
       expect(matches).toBe(true);

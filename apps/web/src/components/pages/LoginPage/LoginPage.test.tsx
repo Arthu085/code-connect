@@ -28,7 +28,7 @@ describe('LoginPage', () => {
 
   it('renders the login form', () => {
     renderPage()
-    expect(screen.getByLabelText('Email ou usuário')).toBeInTheDocument()
+    expect(screen.getByLabelText('Email')).toBeInTheDocument()
     expect(screen.getByLabelText('Senha')).toBeInTheDocument()
   })
 })

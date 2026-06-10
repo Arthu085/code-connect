@@ -8,6 +8,10 @@
     "api:dev": "pnpm --filter api start:dev",
     "api:build": "pnpm --filter api build",
     "api:start": "pnpm --filter api start:prod",
-    "dev": "pnpm --parallel --filter web --filter api dev"
+    "dev": "pnpm --parallel --filter web --filter api dev",
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "api:migrate": "pnpm --filter api prisma:migrate",
+    "api:generate": "pnpm --filter api prisma:generate"
   }
 }
