@@ -14,5 +14,8 @@
   --color-input-placeholder: #6b6f70;
   --color-text-primary: #f0f0f0;
   --color-text-muted: #8c9094;
+  --color-text-light: #bcbcbc;
   --color-error: #f87171;
+  --color-tag-bg: #bcbcbc;
+  --color-thumb-bg: #888888;
 }
